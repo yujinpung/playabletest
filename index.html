@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>플레이어블 광고 데모</title>
+  <title>카리나 미야옹 비니 플레이어블 데모</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     * {
@@ -13,22 +13,23 @@
         sans-serif;
     }
 
+    /* 전체 페이지 배경 – 밝은 파스텔 그라데이션 */
     body {
-      background: #111;
-      color: #fff;
+      background: linear-gradient(180deg, #f3f7ff, #fdefff);
+      color: #222;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
     }
 
-    /* 광고 영역 (실제로는 WebView/iframe 안에 들어가는 영역이라고 보면 됨) */
+    /* 광고 전체 프레임 */
     .game-wrapper {
       width: 320px;
       height: 568px;
-      background: linear-gradient(160deg, #181b2c, #090b12);
+      background: linear-gradient(180deg, #f9fbff, #fff5ff);
       border-radius: 16px;
-      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
       padding: 16px;
       display: flex;
       flex-direction: column;
@@ -46,17 +47,24 @@
     }
 
     .logo {
-      font-weight: 700;
-      font-size: 14px;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .logo-image {
+      height: 18px;
+      object-fit: contain;
+      display: block;
     }
 
     .tag {
       padding: 2px 8px;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.9);
       font-size: 10px;
+      color: #7a5c96;
+      box-shadow: 0 0 8px rgba(186, 141, 215, 0.3);
     }
 
     .game-main {
@@ -72,13 +80,15 @@
     .title {
       font-size: 20px;
       font-weight: 700;
+      color: #222;
     }
 
     .subtitle {
       font-size: 13px;
-      opacity: 0.8;
+      opacity: 0.85;
       line-height: 1.4;
       padding: 0 12px;
+      color: #444;
     }
 
     .status {
@@ -87,15 +97,39 @@
       gap: 16px;
       font-size: 12px;
       margin-top: 6px;
+      color: #555;
     }
 
     .status span {
-      opacity: 0.9;
+      opacity: 0.95;
     }
 
     .highlight {
-      color: #ffd54f;
+      color: #e06ab0;
       font-weight: 600;
+    }
+
+    .brand-hero {
+      margin-bottom: 4px;
+    }
+
+    .brand-hero-logo {
+      height: 28px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .brand-mini {
+      position: absolute;
+      top: 52px;
+      right: 18px;
+      opacity: 0.9;
+    }
+
+    .brand-mini-logo {
+      height: 20px;
+      object-fit: contain;
+      display: block;
     }
 
     .cards {
@@ -105,37 +139,48 @@
       margin-top: 12px;
     }
 
+    /* 상품 카드 – 밝은 배경 + 핑크 그림자 */
     .card {
-      width: 72px;
-      height: 90px;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.05);
+      width: 84px;
+      height: 100px;
+      border-radius: 14px;
+      background: #ffffff;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 34px;
       cursor: pointer;
       user-select: none;
-      transition: transform 0.08s ease, background 0.1s ease;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: transform 0.08s ease, box-shadow 0.1s ease;
+      border: 1px solid #f3d9f0;
+      box-shadow: 0 6px 14px rgba(230, 173, 214, 0.35);
+      overflow: hidden;
+    }
+
+    .card img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
     }
 
     .card:active {
-      transform: scale(0.94);
-      background: rgba(255, 255, 255, 0.13);
+      transform: scale(0.96);
+      box-shadow: 0 2px 8px rgba(200, 150, 210, 0.4);
     }
 
     .card.disabled {
-      opacity: 0.4;
+      opacity: 0.45;
       pointer-events: none;
+      box-shadow: none;
     }
 
     .game-footer {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
       font-size: 10px;
-      opacity: 0.7;
+      opacity: 0.75;
+      color: #555;
     }
 
     .primary-btn {
@@ -143,17 +188,19 @@
       padding: 10px 0;
       border-radius: 999px;
       border: none;
-      background: #ffca28;
+      background: linear-gradient(90deg, #ff93c9, #f8b3ff);
       font-weight: 700;
       font-size: 14px;
       cursor: pointer;
       margin-top: 4px;
-      color: #181818;
+      color: #44223a;
+      box-shadow: 0 6px 14px rgba(245, 152, 199, 0.6);
     }
 
     .primary-btn:active {
       transform: translateY(1px);
-      opacity: 0.9;
+      opacity: 0.95;
+      box-shadow: 0 2px 8px rgba(220, 130, 190, 0.6);
     }
 
     .hidden {
@@ -162,27 +209,29 @@
 
     .badge {
       font-size: 11px;
-      padding: 4px 10px;
+      padding: 4px 12px;
       border-radius: 999px;
-      background: rgba(76, 175, 80, 0.1);
-      border: 1px solid rgba(76, 175, 80, 0.5);
-      color: #c8e6c9;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(206, 171, 238, 0.9);
+      color: #7c5aa0;
       margin-top: 4px;
+      box-shadow: 0 4px 10px rgba(196, 163, 232, 0.5);
     }
 
     .timer-bar-wrap {
       width: 100%;
       height: 6px;
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(250, 222, 246, 0.9);
       border-radius: 999px;
       overflow: hidden;
       margin-top: 10px;
+      box-shadow: inset 0 0 4px rgba(215, 166, 225, 0.6);
     }
 
     .timer-bar {
       height: 100%;
       width: 100%;
-      background: #ff5252;
+      background: linear-gradient(90deg, #ff7bbd, #ffb36f);
       transform-origin: left center;
       transform: scaleX(1);
       transition: transform 0.12s linear;
@@ -191,18 +240,21 @@
     .result-title {
       font-size: 22px;
       font-weight: 800;
+      color: #222;
     }
 
     .result-text {
       font-size: 13px;
-      opacity: 0.85;
+      opacity: 0.9;
       margin-top: 6px;
+      color: #444;
     }
 
     .cta-note {
       font-size: 11px;
       opacity: 0.75;
       margin-top: 2px;
+      color: #666;
     }
   </style>
 </head>
@@ -210,25 +262,36 @@
   <div class="game-wrapper">
     <!-- 상단 영역 -->
     <div class="game-header">
-      <div class="logo">GAME DEMO</div>
+      <div class="logo">
+        <img src="MLB.png" alt="MLB" class="logo-image" />
+      </div>
       <div class="tag" id="phase-label">튜토리얼</div>
     </div>
 
-    <!-- 메인 영역 -->
+    <!-- 인트로 화면 -->
     <div class="game-main" id="screen-intro">
-      <div class="title">10초 안에<br />웃는 얼굴만 잡아봐!</div>
+      <div class="brand-hero">
+        <img src="MLB.png" alt="MLB" class="brand-hero-logo" />
+      </div>
+      <div class="title">10초 안에<br />카리나 미야옹 비니를 잡아봐!</div>
       <div class="subtitle">
-        😃 이모지만 골라서 <span class="highlight">5번</span> 맞추면,<br />
-        실제 게임처럼 이어지는 <span class="highlight">플레이어블</span> 데모야.
+        여러 개의 비니 중에서 <span class="highlight">카리나의 미야옹 비니</span>만 골라서<br />
+        <span class="highlight">5번</span> 맞추면 성공이에요.
       </div>
       <div class="badge">화면을 탭해서 바로 시작해보세요</div>
       <button class="primary-btn" id="start-btn">게임 시작</button>
     </div>
 
+    <!-- 게임 화면 -->
     <div class="game-main hidden" id="screen-game">
-      <div class="title">어디에 있을까? 👀</div>
+      <!-- 작은 MLB 로고 노출 -->
+      <div class="brand-mini">
+        <img src="MLB.png" alt="MLB" class="brand-mini-logo" />
+      </div>
+
+      <div class="title">어디에 숨었을까? 👀</div>
       <div class="subtitle">
-        10초 안에 <span class="highlight">😃</span>만 클릭해서<br />
+        10초 안에 <span class="highlight">미야옹 비니</span>만 클릭해서<br />
         5점을 채워보세요!
       </div>
 
@@ -246,27 +309,33 @@
       </div>
     </div>
 
+    <!-- 결과 화면 -->
     <div class="game-main hidden" id="screen-result">
       <div id="result-success" class="">
+        <div class="brand-hero">
+          <img src="MLB.png" alt="MLB" class="brand-hero-logo" />
+        </div>
         <div class="result-title">성공! 🎉</div>
         <div class="result-text">
-          당신의 순발력, 우리 게임에 딱이에요.<br />
-          지금 바로 이어서 플레이해보세요.
+          카리나의 미야옹 비니 감각, 제대로인데요?<br />
+          지금 바로 이어서 스타일링을 완성해보세요.
         </div>
         <button class="primary-btn" id="cta-btn">
-          지금 바로 설치하고 계속하기
+          미야옹 비니 보러가기
         </button>
         <div class="cta-note">
-          * 버튼 클릭 시 앱 스토어 또는 랜딩 페이지로 이동하도록
-          연동합니다.
+          * 버튼 클릭 시 실제 상품 페이지 또는 앱 스토어로 이동하도록 연동합니다.
         </div>
       </div>
 
       <div id="result-fail" class="hidden">
+        <div class="brand-hero">
+          <img src="MLB.png" alt="MLB" class="brand-hero-logo" />
+        </div>
         <div class="result-title">아쉽네요! 😢</div>
         <div class="result-text">
           거의 다 왔어요.<br />
-          실제 게임에서는 더 여유롭게 도전해볼 수 있어요.
+          실제 페이지에서는 더 여유롭게 미야옹 비니를 만나볼 수 있어요.
         </div>
         <button class="primary-btn" id="retry-btn">다시 도전하기</button>
       </div>
@@ -274,24 +343,42 @@
 
     <!-- 하단 설명 -->
     <div class="game-footer">
-      <div>이 데모는 HTML5로 만든 <b>플레이어블 광고 예시</b>입니다.</div>
+      <div>이 데모는 HTML5로 만든 <b>MLB 플레이어블 광고 예시</b>입니다.</div>
       <div>
         실제 집행 시에는 SDK에서 WebView로 이 파일을 로딩하고,<br />
-        CTA 클릭 시 앱 스토어나 랜딩 URL로 연동합니다.
+        CTA 클릭 시 상품 상세 또는 앱 스토어 URL로 연동합니다.
       </div>
     </div>
   </div>
 
   <script>
-    // 간단한 상태 변수들
+    // ---------------------
+    // 이미지 세팅
+    // ---------------------
+    const MIYAONG_IMAGES = [
+      "미야옹비니1.png",
+      "미야옹비니2.png",
+      "미야옹비니3.png"
+    ];
+
+    const NORMAL_IMAGES = [
+      "일반비니1.png",
+      "일반비니2.png",
+      "일반비니3.png",
+      "일반비니4.png"
+    ];
+
+    // ---------------------
+    // 게임 설정값
+    // ---------------------
     const GAME_DURATION = 10_000; // 10초
     const TARGET_SCORE = 5;
 
     let score = 0;
     let timeLeft = GAME_DURATION; // ms
-    let timerId = null;
     let lastTick = null;
     let gameEnded = false;
+    let timerId = null;
 
     // DOM 요소
     const screenIntro = document.getElementById("screen-intro");
@@ -327,7 +414,7 @@
       scoreEl.textContent = score;
       timeLeftEl.textContent = (timeLeft / 1000).toFixed(1);
       phaseLabel.textContent = "플레이 중";
-      clearInterval(timerId);
+      if (timerId) cancelAnimationFrame(timerId);
       timerId = null;
       createNewRound();
     }
@@ -336,7 +423,6 @@
       showScreen("game");
       resetGame();
       lastTick = performance.now();
-
       timerId = requestAnimationFrame(updateTimer);
     }
 
@@ -377,33 +463,47 @@
         resultSuccess.classList.add("hidden");
         resultFail.classList.remove("hidden");
       }
+    }
 
-      // 여기서 실제 SDK에 "게임 종료/승패" 이벤트를 보낼 수 있음
-      // 예: window.parent.postMessage({ type: 'game_end', success: isSuccess }, '*');
+    function getRandomItem(arr) {
+      const idx = Math.floor(Math.random() * arr.length);
+      return arr[idx];
     }
 
     function createNewRound() {
       cardsWrap.innerHTML = "";
 
-      // 카드 3개 중 랜덤으로 하나만 😃, 나머지는 😈
+      // 카드 3개 중 1개만 미야옹 비니, 나머지는 일반 비니
       const positions = [0, 1, 2];
       const correctIndex = positions[Math.floor(Math.random() * positions.length)];
 
       positions.forEach((pos, i) => {
         const card = document.createElement("div");
         card.className = "card";
+
         const isCorrect = i === correctIndex;
-        card.textContent = isCorrect ? "😃" : "😈";
+        const img = document.createElement("img");
+
+        if (isCorrect) {
+          img.src = getRandomItem(MIYAONG_IMAGES);
+          img.alt = "미야옹 비니";
+          card.dataset.type = "miyaong";
+        } else {
+          img.src = getRandomItem(NORMAL_IMAGES);
+          img.alt = "일반 비니";
+          card.dataset.type = "normal";
+        }
+
+        card.appendChild(img);
 
         card.addEventListener("click", () => {
           if (gameEnded) return;
 
-          if (isCorrect) {
+          if (card.dataset.type === "miyaong") {
             score++;
             scoreEl.textContent = score;
 
-            // 간단한 피드백
-            card.style.transform = "scale(1.1)";
+            card.style.transform = "scale(1.05)";
             setTimeout(() => {
               card.style.transform = "scale(1)";
             }, 80);
@@ -411,11 +511,9 @@
             if (score >= TARGET_SCORE) {
               endGame(true);
             } else {
-              // 다음 라운드
               setTimeout(createNewRound, 150);
             }
           } else {
-            // 오답 클릭 시 살짝 흔들림 효과만 (패널티 없음)
             card.style.transform = "translateY(4px)";
             setTimeout(() => {
               card.style.transform = "translateY(0)";
@@ -430,8 +528,6 @@
     // 버튼 이벤트
     startBtn.addEventListener("click", () => {
       startGame();
-      // 여기서 "게임 시작" 이벤트를 SDK로 보낼 수도 있음
-      // window.parent.postMessage({ type: 'game_start' }, '*');
     });
 
     if (retryBtn) {
@@ -442,12 +538,9 @@
     }
 
     if (ctaBtn) {
-      ctaBtn.addEventListener("click", () => {
-        // TODO: 실제 랜딩 / 앱스토어 URL로 교체
-        const landingUrl = "https://example.com"; // 여기에 진짜 URL
-        // 광고 네트워크 WebView 안이라면:
-        // window.parent.postMessage({ type: 'cta_click' }, '*');
-        window.open(landingUrl, "_blank");
+ctaBtn.addEventListener("click", () => {
+  const landingUrl = "https://www.mlb-korea.com/display/promotions/collection/1557";
+  window.open(landingUrl, "_blank");
       });
     }
 
