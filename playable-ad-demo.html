@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>플레이어블 광고 데모</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
+
+    body {
+      background: #111;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    /* 광고 영역 (실제로는 WebView/iframe 안에 들어가는 영역이라고 보면 됨) */
+    .game-wrapper {
+      width: 320px;
+      height: 568px;
+      background: linear-gradient(160deg, #181b2c, #090b12);
+      border-radius: 16px;
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.5);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .logo {
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .tag {
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      font-size: 10px;
+    }
+
+    .game-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 12px;
+    }
+
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      opacity: 0.8;
+      line-height: 1.4;
+      padding: 0 12px;
+    }
+
+    .status {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      font-size: 12px;
+      margin-top: 6px;
+    }
+
+    .status span {
+      opacity: 0.9;
+    }
+
+    .highlight {
+      color: #ffd54f;
+      font-weight: 600;
+    }
+
+    .cards {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .card {
+      width: 72px;
+      height: 90px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 34px;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.08s ease, background 0.1s ease;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .card:active {
+      transform: scale(0.94);
+      background: rgba(255, 255, 255, 0.13);
+    }
+
+    .card.disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .game-footer {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 10px;
+      opacity: 0.7;
+    }
+
+    .primary-btn {
+      width: 100%;
+      padding: 10px 0;
+      border-radius: 999px;
+      border: none;
+      background: #ffca28;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 4px;
+      color: #181818;
+    }
+
+    .primary-btn:active {
+      transform: translateY(1px);
+      opacity: 0.9;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(76, 175, 80, 0.1);
+      border: 1px solid rgba(76, 175, 80, 0.5);
+      color: #c8e6c9;
+      margin-top: 4px;
+    }
+
+    .timer-bar-wrap {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .timer-bar {
+      height: 100%;
+      width: 100%;
+      background: #ff5252;
+      transform-origin: left center;
+      transform: scaleX(1);
+      transition: transform 0.12s linear;
+    }
+
+    .result-title {
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .result-text {
+      font-size: 13px;
+      opacity: 0.85;
+      margin-top: 6px;
+    }
+
+    .cta-note {
+      font-size: 11px;
+      opacity: 0.75;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-wrapper">
+    <!-- 상단 영역 -->
+    <div class="game-header">
+      <div class="logo">GAME DEMO</div>
+      <div class="tag" id="phase-label">튜토리얼</div>
+    </div>
+
+    <!-- 메인 영역 -->
+    <div class="game-main" id="screen-intro">
+      <div class="title">10초 안에<br />웃는 얼굴만 잡아봐!</div>
+      <div class="subtitle">
+        😃 이모지만 골라서 <span class="highlight">5번</span> 맞추면,<br />
+        실제 게임처럼 이어지는 <span class="highlight">플레이어블</span> 데모야.
+      </div>
+      <div class="badge">화면을 탭해서 바로 시작해보세요</div>
+      <button class="primary-btn" id="start-btn">게임 시작</button>
+    </div>
+
+    <div class="game-main hidden" id="screen-game">
+      <div class="title">어디에 있을까? 👀</div>
+      <div class="subtitle">
+        10초 안에 <span class="highlight">😃</span>만 클릭해서<br />
+        5점을 채워보세요!
+      </div>
+
+      <div class="status">
+        <span>남은 시간: <span id="time-left">10.0</span>s</span>
+        <span>점수: <span id="score">0</span>/5</span>
+      </div>
+
+      <div class="cards" id="cards-wrap">
+        <!-- JS로 카드가 채워짐 -->
+      </div>
+
+      <div class="timer-bar-wrap">
+        <div class="timer-bar" id="timer-bar"></div>
+      </div>
+    </div>
+
+    <div class="game-main hidden" id="screen-result">
+      <div id="result-success" class="">
+        <div class="result-title">성공! 🎉</div>
+        <div class="result-text">
+          당신의 순발력, 우리 게임에 딱이에요.<br />
+          지금 바로 이어서 플레이해보세요.
+        </div>
+        <button class="primary-btn" id="cta-btn">
+          지금 바로 설치하고 계속하기
+        </button>
+        <div class="cta-note">
+          * 버튼 클릭 시 앱 스토어 또는 랜딩 페이지로 이동하도록
+          연동합니다.
+        </div>
+      </div>
+
+      <div id="result-fail" class="hidden">
+        <div class="result-title">아쉽네요! 😢</div>
+        <div class="result-text">
+          거의 다 왔어요.<br />
+          실제 게임에서는 더 여유롭게 도전해볼 수 있어요.
+        </div>
+        <button class="primary-btn" id="retry-btn">다시 도전하기</button>
+      </div>
+    </div>
+
+    <!-- 하단 설명 -->
+    <div class="game-footer">
+      <div>이 데모는 HTML5로 만든 <b>플레이어블 광고 예시</b>입니다.</div>
+      <div>
+        실제 집행 시에는 SDK에서 WebView로 이 파일을 로딩하고,<br />
+        CTA 클릭 시 앱 스토어나 랜딩 URL로 연동합니다.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 간단한 상태 변수들
+    const GAME_DURATION = 10_000; // 10초
+    const TARGET_SCORE = 5;
+
+    let score = 0;
+    let timeLeft = GAME_DURATION; // ms
+    let timerId = null;
+    let lastTick = null;
+    let gameEnded = false;
+
+    // DOM 요소
+    const screenIntro = document.getElementById("screen-intro");
+    const screenGame = document.getElementById("screen-game");
+    const screenResult = document.getElementById("screen-result");
+    const startBtn = document.getElementById("start-btn");
+    const retryBtn = document.getElementById("retry-btn");
+    const ctaBtn = document.getElementById("cta-btn");
+    const phaseLabel = document.getElementById("phase-label");
+    const timeLeftEl = document.getElementById("time-left");
+    const scoreEl = document.getElementById("score");
+    const timerBar = document.getElementById("timer-bar");
+    const cardsWrap = document.getElementById("cards-wrap");
+    const resultSuccess = document.getElementById("result-success");
+    const resultFail = document.getElementById("result-fail");
+
+    function showScreen(id) {
+      screenIntro.classList.add("hidden");
+      screenGame.classList.add("hidden");
+      screenResult.classList.add("hidden");
+
+      if (id === "intro") screenIntro.classList.remove("hidden");
+      if (id === "game") screenGame.classList.remove("hidden");
+      if (id === "result") screenResult.classList.remove("hidden");
+    }
+
+    function resetGame() {
+      score = 0;
+      timeLeft = GAME_DURATION;
+      lastTick = null;
+      gameEnded = false;
+      timerBar.style.transform = "scaleX(1)";
+      scoreEl.textContent = score;
+      timeLeftEl.textContent = (timeLeft / 1000).toFixed(1);
+      phaseLabel.textContent = "플레이 중";
+      clearInterval(timerId);
+      timerId = null;
+      createNewRound();
+    }
+
+    function startGame() {
+      showScreen("game");
+      resetGame();
+      lastTick = performance.now();
+
+      timerId = requestAnimationFrame(updateTimer);
+    }
+
+    function updateTimer(now) {
+      if (gameEnded) return;
+      if (!lastTick) lastTick = now;
+
+      const delta = now - lastTick;
+      lastTick = now;
+      timeLeft -= delta;
+
+      if (timeLeft < 0) timeLeft = 0;
+
+      timeLeftEl.textContent = (timeLeft / 1000).toFixed(1);
+      const progress = timeLeft / GAME_DURATION;
+      timerBar.style.transform = `scaleX(${progress})`;
+
+      if (timeLeft <= 0) {
+        endGame(score >= TARGET_SCORE);
+      } else {
+        timerId = requestAnimationFrame(updateTimer);
+      }
+    }
+
+    function endGame(isSuccess) {
+      gameEnded = true;
+      phaseLabel.textContent = "결과";
+
+      // 카드 클릭 막기
+      const allCards = document.querySelectorAll(".card");
+      allCards.forEach((c) => c.classList.add("disabled"));
+
+      showScreen("result");
+      if (isSuccess) {
+        resultSuccess.classList.remove("hidden");
+        resultFail.classList.add("hidden");
+      } else {
+        resultSuccess.classList.add("hidden");
+        resultFail.classList.remove("hidden");
+      }
+
+      // 여기서 실제 SDK에 "게임 종료/승패" 이벤트를 보낼 수 있음
+      // 예: window.parent.postMessage({ type: 'game_end', success: isSuccess }, '*');
+    }
+
+    function createNewRound() {
+      cardsWrap.innerHTML = "";
+
+      // 카드 3개 중 랜덤으로 하나만 😃, 나머지는 😈
+      const positions = [0, 1, 2];
+      const correctIndex = positions[Math.floor(Math.random() * positions.length)];
+
+      positions.forEach((pos, i) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        const isCorrect = i === correctIndex;
+        card.textContent = isCorrect ? "😃" : "😈";
+
+        card.addEventListener("click", () => {
+          if (gameEnded) return;
+
+          if (isCorrect) {
+            score++;
+            scoreEl.textContent = score;
+
+            // 간단한 피드백
+            card.style.transform = "scale(1.1)";
+            setTimeout(() => {
+              card.style.transform = "scale(1)";
+            }, 80);
+
+            if (score >= TARGET_SCORE) {
+              endGame(true);
+            } else {
+              // 다음 라운드
+              setTimeout(createNewRound, 150);
+            }
+          } else {
+            // 오답 클릭 시 살짝 흔들림 효과만 (패널티 없음)
+            card.style.transform = "translateY(4px)";
+            setTimeout(() => {
+              card.style.transform = "translateY(0)";
+            }, 80);
+          }
+        });
+
+        cardsWrap.appendChild(card);
+      });
+    }
+
+    // 버튼 이벤트
+    startBtn.addEventListener("click", () => {
+      startGame();
+      // 여기서 "게임 시작" 이벤트를 SDK로 보낼 수도 있음
+      // window.parent.postMessage({ type: 'game_start' }, '*');
+    });
+
+    if (retryBtn) {
+      retryBtn.addEventListener("click", () => {
+        showScreen("game");
+        startGame();
+      });
+    }
+
+    if (ctaBtn) {
+      ctaBtn.addEventListener("click", () => {
+        // TODO: 실제 랜딩 / 앱스토어 URL로 교체
+        const landingUrl = "https://example.com"; // 여기에 진짜 URL
+        // 광고 네트워크 WebView 안이라면:
+        // window.parent.postMessage({ type: 'cta_click' }, '*');
+        window.open(landingUrl, "_blank");
+      });
+    }
+
+    // 최초 진입은 인트로 화면
+    showScreen("intro");
+  </script>
+</body>
+</html>
